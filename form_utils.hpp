@@ -1,7 +1,15 @@
 #pragma once
 #include "includes.hpp"
 
-#define _FORM_ALIGN_CENTER -1
+enum FORM_CALLBACK_RET
+{
+	_DEFAULT
+};
+
+enum FORM_ALIGN
+{
+	_CENTER
+};
 
 using std::string;
 
@@ -30,12 +38,13 @@ typedef struct Application_Properties
 typedef struct Form_Object
 {
 	public:
-		Form_Object(SizePos, HWND, HINSTANCE, int, string, string, string, int, int, int, int);
-	
-		HWND get_HWND() const;
-		int get_ID() const;
-		string get_Name() const;
-		SizePos get_Size() const;
+		Form_Object(int, string, string, string, int, int, int, int, SizePos);
+		string getType() const { return type; }
+		string getName() const { return name; }
+		string getCaption() const { return caption; }
+
+		SizePos getPos() const { return pos; }
+		SizePos getSize() const { return size; }
 
 	private:
 		HWND hWnd;
@@ -43,31 +52,33 @@ typedef struct Form_Object
 
 		string type;
 		string name;
-		string value;
+		string caption;
 
 		SizePos pos;
 		SizePos size;
 
 		void Calc_Size(int, int, SizePos);
 		void Calc_Pos(int, int, SizePos);
-
-		HWND Create_Elem(HWND, HINSTANCE, bool);
-
 } FormObj;
 
 class Form
 {
 	public:
-		Form(HINSTANCE, int, string, string, string, HICON, NOTIFYICONDATA &);
+		Form(HINSTANCE, string, int);
+		
+		const HWND get_HWND() const { return hWnd; }
+
+		static const FORM_CALLBACK_RET CALLBACK_RET_DEFAULT = _DEFAULT;
+		static const FORM_ALIGN ALIGN_CENTER = _CENTER;
 
 	private:
 		HWND		hWnd;
+		HICON Icon;
+		NOTIFYICONDATA TrayIcon;
 
-		std::vector<FormObj> Objects;
-
-		string get_ObjectNameByParamW(WPARAM) const;
-		FormObj get_ObjectByParamW(WPARAM) const;
-		FormObj get_ObjectByName(string) const;
+		LRESULT ON_CREATE(HWND, UINT);
+		LRESULT ON_PAINT(HWND, UINT);
+		LRESULT ON_QUERYENDSESSION(HWND, UINT);
 
 		static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 };
